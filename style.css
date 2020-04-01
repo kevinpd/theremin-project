@@ -1,0 +1,57 @@
+/*
+    Title: Self-Initiated Theremin Project
+    Creator: Kevin Dyson
+*/
+* {
+    margin: 0;
+    padding: 0;
+}
+.header {
+    background-color: rgb(224, 142, 64);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    height: 50px;
+    display: grid;
+    grid-template-columns: 100px auto 150px;
+}
+.header__back-btn {
+    font-size: 1.5rem; 
+    color: black;
+    font-family: 'Roboto', sans-serif;
+    padding: .2rem .4rem;
+    text-decoration: none;
+}
+.header__back-btn:hover {
+    background-color: rgb(238, 162, 92);
+}
+.header__clear-btn {
+    background-color: rgb(224, 142, 64);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    border: none;
+}
+.header__clear-btn:hover {
+    background-color: rgb(238, 162, 92);
+    cursor: pointer;
+}
+.main {
+    display: grid;
+    grid-template-columns: 100px auto;
+    background-color: rgb(20,20,20);
+    color: white;
+}
+.main__music-pad {
+    background-color: rgb(240, 240, 240);
+    width: 100%;
+    height: calc(100vh - 100px);
+    cursor: pointer;
+}
+h2 {
+    height: 50px;
+}
+h1, h2 {
+    font-family: 'Roboto', sans-serif;
+}
+audio {
+    display: none;
+}

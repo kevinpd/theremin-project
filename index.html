@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>The Theremin Online | JavaScript 6</title>
+    <meta name="description" content="A small self-initiated project to create a theremin using JavaScript ES6. Expanding my foundational knowledge of JavaScript and putting it into action. Also using Web Audio API to manipulate the audio sounds." />
+
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <!--Fonts Types-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto&Roboto+Slab&display=swap" rel="stylesheet">
+
+    <!--stylesheet-->
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <!--Favicon Icon Block-->
+    <link rel="apple-touch-icon" sizes="57x57" href="../../assets/favicon/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../../assets/favicon/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../../assets/favicon/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../../assets/favicon/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../../assets/favicon/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../../assets/favicon/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="../../assets/favicon/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../../assets/favicon/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../assets/favicon/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../assets/favicon/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../../assets/favicon/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon/favicon-16x16.png" />
+    <link rel="manifest" href="../../assets/favicon/manifest.json" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="../../assets/favicon/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <!--End of favicon block-->
+
+</head>
+</head>
+<body>
+    <header class="header">
+        <a class="header__back-btn" href="https://17076251.webdevmmu.uk/pages/work.php">&LessLess; Back</a>
+        <h1>Theremin</h1>
+        <button class="header__clear-btn">Clear Canvas</button>
+    </header>
+    <main class="main">
+        <h2>Volume</h2>
+        <canvas class="main__music-pad" id="draw"></canvas>
+        <h2>Pitch</h2>
+    </main>
+
+    <audio src="sound-effect.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        // Music Theremin Code Below
+        // adjusting the pitch of the audio file using Web Audio API
+            // Cross-browser
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        const musicPad = document.querySelector('.main__music-pad');
+        const audioElement = document.querySelector('audio');
+
+        const track = audioCtx.createMediaElementSource(audioElement);
+
+        // starting and stopping playing the theremin on click or drag
+        function play() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            audioElement.loop = true;
+            audioElement.play();
+
+            musicPad.addEventListener('mousemove', (e) => {
+                adjustPitch(e);
+                adjustVol(e);
+            });
+        };
+        musicPad.addEventListener("mousedown", play);
+
+        function stop() {
+            audioElement.loop = false;
+            audioElement.pause();
+            audioCtx.suspend();
+        };
+        musicPad.addEventListener("mouseup", stop);
+        musicPad.addEventListener("mouseout", stop);
+
+        // Volume
+        const gainNode = audioCtx.createGain();
+        function adjustVol(e) {
+            let height = musicPad.offsetHeight;
+            let mouseY = e.offsetY;
+            let volValue = (((height-mouseY) / height) * 2);
+            
+            gainNode.gain.value = volValue;
+        };
+
+        // Oscillator or Pitch
+        const oscillator = audioCtx.createOscillator();
+        oscillator.detune.value = 100;
+        oscillator.start();
+
+        function adjustPitch(e) {
+            let width = musicPad.offsetWidth;
+            let mouseX = e.offsetX;
+            let pitchValue = ((mouseX / width) * 3000);
+            oscillator.frequency.value = pitchValue;
+        };
+
+        // Connecting the audio
+        track.connect(gainNode).connect(audioCtx.destination);
+        oscillator.connect(gainNode);
+
+        
+        // Canvas Drawing Code Below
+        const canvas = document.querySelector('#draw');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = musicPad.offsetWidth;
+        canvas.height = musicPad.offsetHeight;
+
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 10;
+
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let hue = 0;
+        let direction = true;
+
+        function draw(e) {
+        if (!isDrawing) return; //stops the function when mousedown is false
+        ctx.strokeStyle = `hsl(${hue},75%,50%)`;
+        ctx.beginPath();
+        //starts from
+        ctx.moveTo(lastX, lastY);
+        //goes to
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+
+        // lastX = e.offsetX;
+        // lastY = e.offsetY;
+        //these two are the same as below
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+
+        hue++;
+        if(hue >= 360) {
+            hue = 0;
+        }
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseout', () => isDrawing = false);
+
+        document.querySelector('.header__clear-btn').addEventListener("click", () => {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        });
+    </script>
+</body>
+</html>
